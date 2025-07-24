@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Thông Báo Đặc Biệt
-Plugin URI:  https://phapduyen.com/
+Plugin URI:  https://github.com/thais-lee/wp_plugin_thong_bao_dac_biet.git
 Description: Một plugin hiển thị nhiều thông báo tùy chỉnh trên trang web, không lưu cache, có thể đính bằng nhiều shortcode, với thời gian hiển thị cụ thể và hỗ trợ nội dung HTML/JS.
 Version:     1.0
 Author:      Phap Duyen - Lê Thái
