@@ -1,0 +1,46 @@
+.tbd-admin-table th:nth-child(1),
+.tbd-admin-table td:nth-child(1) {
+    width: 20%;
+}
+.tbd-admin-table th:nth-child(2),
+.tbd-admin-table td:nth-child(2) {
+    width: 15%;
+}
+.tbd-admin-table th:nth-child(3),
+.tbd-admin-table td:nth-child(3) {
+    width: 30%;
+}
+.tbd-admin-table th:nth-child(4),
+.tbd-admin-table td:nth-child(4) {
+    width: 20%;
+}
+.tbd-admin-table th:nth-child(5),
+.tbd-admin-table td:nth-child(5) {
+    width: 15%;
+    text-align: center;
+}
+.tbd-admin-table .button {
+    margin: 2px;
+}
+.button-danger {
+    background: #dc3232;
+    border-color: #dc3232 #dc3232 #b32a2a;
+    box-shadow: 0 1px 0 #b32a2a;
+    color: #fff;
+    text-decoration: none;
+    text-shadow: 0 -1px 1px #b32a2a, 0 1px 1px #dc3232;
+}
+.button-danger:hover {
+    background: #e04b4b;
+    border-color: #b32a2a;
+}
+
+/* Style cho cảnh báo bảo mật */
+.notification-warning-message {
+    color: #a00;
+    font-weight: bold;
+    background-color: #ffebe8;
+    border-left: 4px solid #a00;
+    padding: 10px;
+    margin-top: 15px;
+}

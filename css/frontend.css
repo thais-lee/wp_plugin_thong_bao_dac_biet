@@ -1,0 +1,28 @@
+/* Sử dụng class mới cho shortcode */
+.tbd-shortcode-notification {
+    background-color: #f7d794; /* Màu nền nổi bật */
+    color: #333;
+    padding: 15px 20px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px; /* Thêm khoảng cách dưới nếu cần */
+    font-family: Arial, sans-serif;
+    border-radius: 5px; /* Bo góc nhẹ */
+}
+
+.tbd-shortcode-notification h2 {
+    margin: 0 0 5px 0;
+    font-size: 1.2em;
+    color: #c0392b; /* Màu đỏ cho tiêu đề */
+}
+
+.tbd-shortcode-notification p {
+    margin: 0;
+    font-size: 1em;
+    line-height: 1.4;
+}
+
+/* Loại bỏ các thuộc tính định vị cố định vì đây là shortcode */
+/* @keyframes slideInDown có thể không còn phù hợp nếu bạn muốn nó xuất hiện trong luồng nội dung.
+   Nếu bạn vẫn muốn hiệu ứng này, bạn có thể cân nhắc áp dụng nó cho 'opacity' hoặc 'height' thay vì 'transform'.
+   Để đơn giản, tôi đã bỏ nó khỏi shortcode. */
