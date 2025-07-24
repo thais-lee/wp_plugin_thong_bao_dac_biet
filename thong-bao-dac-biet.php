@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Thông Báo Đặc Biệt
-Plugin URI:  https://yourwebsite.com/
+Plugin URI:  https://phapduyen.com/
 Description: Một plugin hiển thị nhiều thông báo tùy chỉnh trên trang web, không lưu cache, có thể đính bằng nhiều shortcode, với thời gian hiển thị cụ thể và hỗ trợ nội dung HTML/JS.
-Version:     1.4
-Author:      Your Name
-Author URI:  https://yourwebsite.com/
+Version:     1.0
+Author:      Phap Duyen - Lê Thái
+Author URI:  https://phapduyen.com/
 License:     GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: thong-bao-dac-biet
