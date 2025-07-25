@@ -121,6 +121,27 @@ function tbd_get_notification_ajax_callback() {
 add_action( 'wp_ajax_tbd_get_notification', 'tbd_get_notification_ajax_callback' );
 add_action( 'wp_ajax_nopriv_tbd_get_notification', 'tbd_get_notification_ajax_callback' );
 
+// AJAX handler bật/tắt trạng thái
+add_action('wp_ajax_tbd_toggle_active', function() {
+    check_ajax_referer('tbd_admin_nonce');
+    $id = sanitize_key($_POST['id']);
+    $active = !empty($_POST['active']);
+    $all_notifications = get_option('tbd_all_notifications', array());
+    if(isset($all_notifications[$id])) {
+        $all_notifications[$id]['active'] = $active;
+        update_option('tbd_all_notifications', $all_notifications);
+        wp_send_json_success();
+    }
+    wp_send_json_error();
+});
+
+// Khai báo nonce cho JS admin
+add_action('admin_enqueue_scripts', function() {
+    wp_localize_script('tbd-admin-script', 'tbd_admin_vars', array(
+        'nonce' => wp_create_nonce('tbd_admin_nonce')
+    ));
+});
+
 /**
  * Hàm xử lý Shortcode
  * Chấp nhận thuộc tính 'id' để xác định thông báo cụ thể
@@ -144,6 +165,11 @@ function tbd_notification_shortcode( $atts ) {
     $all_notifications = get_option( 'tbd_all_notifications', array() );
     $notification_data = $all_notifications[ $notification_id ] ?? null;
     if ( ! $notification_data ) {
+        return '';
+    }
+
+    // Nếu badge không active thì không hiển thị
+    if (empty($notification_data['active'])) {
         return '';
     }
 

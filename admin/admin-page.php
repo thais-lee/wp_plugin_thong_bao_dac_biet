@@ -77,7 +77,8 @@ function tbd_list_notifications_table() {
                     <th scope="col"><?php esc_html_e( 'Tiêu đề', 'thong-bao-dac-biet' ); ?></th>
                     <th scope="col"><?php esc_html_e( 'Nội dung (trích dẫn)', 'thong-bao-dac-biet' ); ?></th>
                     <th scope="col"><?php esc_html_e( 'Thời gian hiển thị', 'thong-bao-dac-biet' ); ?></th>
-                    <th scope="col"><?php esc_html_e( 'Hành động', 'thong-bao-dac-biet' ); ?></th>
+                    <th scope="col" style="width: 120px; text-align: center;">Kích hoạt</th>
+                    <th scope="col" style="width: 140px; text-align: center;">Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -97,6 +98,12 @@ function tbd_list_notifications_table() {
                                 }
                                 ?>
                             </td>
+                            <td style="text-align: center; vertical-align: middle;">
+                                <label class="tbd-switch">
+                                    <input type="checkbox" class="tbd-toggle-active" data-id="<?php echo esc_attr($id); ?>" <?php checked($data['active'] ?? true); ?> />
+                                    <span class="slider"></span>
+                                </label>
+                            </td>
                             <td>
                                 <a href="?page=thong-bao-dac-biet&action=edit&id=<?php echo esc_attr( $id ); ?>" class="button button-primary"><?php esc_html_e( 'Sửa', 'thong-bao-dac-biet' ); ?></a>
                                 <a href="?page=thong-bao-dac-biet&action=delete&id=<?php echo esc_attr( $id ); ?>&_wpnonce=<?php echo wp_create_nonce( 'tbd_delete_notification_' . $id ); ?>" class="button button-danger" onclick="return confirm('<?php esc_attr_e( 'Bạn có chắc chắn muốn xóa thông báo này?', 'thong-bao-dac-biet' ); ?>');"><?php esc_html_e( 'Xóa', 'thong-bao-dac-biet' ); ?></a>
@@ -105,7 +112,7 @@ function tbd_list_notifications_table() {
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="5"><?php esc_html_e( 'Chưa có thông báo nào.', 'thong-bao-dac-biet' ); ?></td>
+                        <td colspan="6"><?php esc_html_e( 'Chưa có thông báo nào.', 'thong-bao-dac-biet' ); ?></td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -131,6 +138,7 @@ function tbd_add_edit_notification_form( $notification_id = null ) {
         'start_time'     => '',
         'end_date'       => '',
         'end_time'       => '',
+        'active' => true,
     );
 
     if ( $is_editing ) {
@@ -147,6 +155,7 @@ function tbd_add_edit_notification_form( $notification_id = null ) {
             $notification_data['title'] = $current_data['title'] ?? '';
             $notification_data['content'] = $current_data['content'] ?? '';
             $notification_data['duration'] = $current_data['duration'] ?? 5;
+            $notification_data['active'] = isset($current_data['active']) ? $current_data['active'] : true;
 
             // Tách chuỗi datetime để hiển thị trong input
             $start_datetime_stored = $current_data['start_datetime'] ?? '';
@@ -177,6 +186,7 @@ function tbd_add_edit_notification_form( $notification_id = null ) {
         // BỎ wp_kses_post() ở đây để cho phép HTML và JS
         $notification_content  = $_POST['tbd_notification_content'];
         $notification_duration = absint( $_POST['tbd_notification_duration'] );
+        $notification_active   = isset($_POST['tbd_notification_active']) ? (bool)$_POST['tbd_notification_active'] : false;
         $start_date            = sanitize_text_field( $_POST['tbd_notification_start_date'] );
         $start_time            = sanitize_text_field( $_POST['tbd_notification_start_time'] );
         $end_date              = sanitize_text_field( $_POST['tbd_notification_end_date'] );
@@ -200,6 +210,7 @@ function tbd_add_edit_notification_form( $notification_id = null ) {
             $notification_data['title'] = $notification_title;
             $notification_data['content'] = $notification_content;
             $notification_data['duration'] = $notification_duration;
+            $notification_data['active'] = $notification_active;
             $notification_data['start_date'] = $start_date;
             $notification_data['start_time'] = $start_time;
             $notification_data['end_date'] = $end_date;
@@ -210,6 +221,7 @@ function tbd_add_edit_notification_form( $notification_id = null ) {
                 'title'          => $notification_title,
                 'content'        => $notification_content, // LƯU NỘI DUNG THÔ
                 'duration'       => $notification_duration,
+                'active'         => $notification_active,
                 'start_datetime' => $start_datetime,
                 'end_datetime'   => $end_datetime,
             );
@@ -282,6 +294,13 @@ function tbd_add_edit_notification_form( $notification_id = null ) {
                         <p class="description notification-warning-message"><?php esc_html_e( 'Cảnh báo: Nội dung này cho phép nhập mã HTML và JavaScript. Hãy cẩn thận khi sử dụng để tránh các vấn đề bảo mật.', 'thong-bao-dac-biet' ); ?></p>
                     </td>
                 </tr>
+                <tr valign="top">
+                    <th scope="row"><?php esc_html_e( 'Kích hoạt', 'thong-bao-dac-biet' ); ?></th>
+                    <td>
+                        <input type="checkbox" name="tbd_notification_active" value="1" <?php checked( $notification_data['active'], true ); ?> />
+                        <span class="description"><?php esc_html_e( 'Bật/tắt hiển thị thông báo này.', 'thong-bao-dac-biet' ); ?></span>
+                    </td>
+                </tr>
             </table>
 
             <?php submit_button( __( 'Lưu Thông báo', 'thong-bao-dac-biet' ) ); ?>
@@ -313,3 +332,14 @@ function tbd_delete_notification( $notification_id ) {
         exit;
     }
 }
+
+// Thêm CSS cho switch toggle nếu chưa có
+function tbd_add_admin_styles() {
+    wp_enqueue_style( 'tbd-admin-styles', plugins_url( 'css/admin.css', dirname( __FILE__ ) ) );
+    wp_enqueue_script( 'tbd-admin-script', TBD_PLUGIN_URL . 'js/admin.js', array( 'jquery' ), '1.0', true );
+    // Localize nonce cho JS
+    wp_localize_script('tbd-admin-script', 'tbd_admin_vars', array(
+        'nonce' => wp_create_nonce('tbd_admin_nonce')
+    ));
+}
+add_action( 'admin_enqueue_scripts', 'tbd_add_admin_styles' );

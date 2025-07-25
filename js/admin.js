@@ -1,6 +1,14 @@
-// Bạn có thể thêm các script jQuery/JS cho trang admin tại đây nếu cần
-// Ví dụ: validation, interactive elements...
-jQuery(document).ready(function($) {
-    // Không có script cụ thể nào cần thiết ngay bây giờ vì TinyMCE đã được WordPress quản lý.
-    // Nếu bạn muốn thêm các tính năng đặc biệt cho editor hoặc các trường khác, hãy thêm chúng ở đây.
+jQuery(document).on('change', '.tbd-toggle-active', function() {
+    var id = jQuery(this).data('id');
+    var checked = jQuery(this).is(':checked') ? 1 : 0;
+    jQuery.post(ajaxurl, {
+        action: 'tbd_toggle_active',
+        id: id,
+        active: checked,
+        _ajax_nonce: tbd_admin_vars.nonce
+    }, function(response) {
+        if(!response.success) {
+            alert('Lỗi khi cập nhật trạng thái!');
+        }
+    });
 });
