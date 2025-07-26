@@ -211,152 +211,71 @@ function tbd_add_settings_link( $links ) {
 }
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'tbd_add_settings_link' );
 
-// Cho phép script/style và mọi thuộc tính trong TinyMCE + KSES cho admin
-add_filter('tiny_mce_before_init', function($init) {
-    $init['valid_elements'] = '*[*]';
-    $init['extended_valid_elements'] = '*[*]';
-    return $init;
-});
-add_filter('wp_kses_allowed_html', function($tags, $context) {
-    if ($context === 'post' && current_user_can('manage_options')) {
-        $tags['script'] = array(
-            'type' => true, 'src' => true, 'async' => true, 'defer' => true, 'charset' => true
-        );
-        $tags['style'] = array(
-            'type' => true, 'media' => true
-        );
-        $tags['iframe'] = array(
-            'src' => true, 'height' => true, 'width' => true, 'frameborder' => true, 'allowfullscreen' => true, 'allow' => true
-        );
-        // Cho phép mọi thuộc tính cho mọi thẻ
-        foreach ($tags as $tag => &$attrs) {
-            $attrs = true;
+// Các filter đã được chuyển vào function tbd_apply_editor_filters() để chỉ áp dụng cho admin page của plugin
+
+// Chỉ áp dụng filter cho admin page của plugin
+function tbd_apply_editor_filters() {
+    // Chỉ áp dụng khi đang ở trang admin của plugin
+    if (!isset($_GET['page']) || $_GET['page'] !== 'thong-bao-dac-biet') {
+        return;
+    }
+    
+    // Chỉ áp dụng cho admin
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    
+    // Filter cho TinyMCE
+    add_filter('tiny_mce_before_init', function($init) {
+        $init['valid_elements'] = '*[*]';
+        $init['extended_valid_elements'] = '*[*]';
+        $init['entities'] = false;
+        $init['verify_html'] = false;
+        $init['cleanup'] = false;
+        $init['cleanup_on_startup'] = false;
+        $init['validate_children'] = false;
+        return $init;
+    }, 999);
+    
+    // Filter cho wp_editor
+    add_filter('wp_editor_settings', function($settings, $editor_id) {
+        if ($editor_id === 'tbd_notification_content') {
+            $settings['wpautop'] = false;
+            $settings['media_buttons'] = false;
+            $settings['textarea_rows'] = 15;
+            $settings['teeny'] = false;
+            $settings['tinymce'] = array(
+                'valid_elements' => '*[*]',
+                'extended_valid_elements' => '*[*]',
+                'entities' => false,
+                'verify_html' => false,
+                'cleanup' => false,
+                'cleanup_on_startup' => false,
+                'validate_children' => false,
+            );
         }
-    }
-    return $tags;
-}, 10, 2);
-
-// Tắt hoàn toàn lọc khi lưu option tbd_all_notifications
-add_filter('pre_update_option_tbd_all_notifications', function($value, $old_value, $option) {
-    // Không lọc gì cả, trả về nguyên gốc
-    return $value;
-}, 10, 3);
-
-// Tắt các filter có thể can thiệp vào việc lưu option
-remove_all_filters('option_tbd_all_notifications');
-remove_all_filters('sanitize_option_tbd_all_notifications');
-
-// Tắt lọc content khi lưu
-add_filter('content_save_pre', function($content) {
-    // Nếu đang lưu thông báo, không lọc
-    if (isset($_POST['tbd_notification_content'])) {
-        return $_POST['tbd_notification_content'];
-    }
-    return $content;
-}, 1);
-
-// Tắt wp_kses_post và các hàm lọc khác cho nội dung thông báo
-add_filter('wp_kses_allowed_html', function($tags, $context) {
-    // Cho phép mọi thẻ và thuộc tính cho admin
-    if (current_user_can('manage_options')) {
-        $tags = array();
-        $tags['*'] = array('*' => true);
-    }
-    return $tags;
-}, 1, 2);
-
-// Tắt hoàn toàn wp_kses_post cho nội dung thông báo
-add_filter('wp_kses_allowed_html', function($tags, $context) {
-    if (current_user_can('manage_options')) {
-        // Cho phép mọi thẻ HTML
-        $tags['*'] = array('*' => true);
-        $tags['script'] = array('*' => true);
-        $tags['style'] = array('*' => true);
-        $tags['iframe'] = array('*' => true);
-        $tags['img'] = array('*' => true);
-        $tags['a'] = array('*' => true);
-        $tags['div'] = array('*' => true);
-        $tags['span'] = array('*' => true);
-        $tags['p'] = array('*' => true);
-        $tags['h1'] = array('*' => true);
-        $tags['h2'] = array('*' => true);
-        $tags['h3'] = array('*' => true);
-        $tags['h4'] = array('*' => true);
-        $tags['h5'] = array('*' => true);
-        $tags['h6'] = array('*' => true);
-        $tags['ul'] = array('*' => true);
-        $tags['ol'] = array('*' => true);
-        $tags['li'] = array('*' => true);
-        $tags['br'] = array('*' => true);
-        $tags['strong'] = array('*' => true);
-        $tags['em'] = array('*' => true);
-        $tags['b'] = array('*' => true);
-        $tags['i'] = array('*' => true);
-        $tags['u'] = array('*' => true);
-        $tags['code'] = array('*' => true);
-        $tags['pre'] = array('*' => true);
-        $tags['blockquote'] = array('*' => true);
-        $tags['table'] = array('*' => true);
-        $tags['tr'] = array('*' => true);
-        $tags['td'] = array('*' => true);
-        $tags['th'] = array('*' => true);
-        $tags['thead'] = array('*' => true);
-        $tags['tbody'] = array('*' => true);
-        $tags['tfoot'] = array('*' => true);
-    }
-    return $tags;
-}, 999, 2);
-
-// Tắt escape cho nội dung thông báo
-add_filter('content_save_pre', function($content) {
-    // Nếu đang lưu thông báo, không escape
-    if (isset($_POST['tbd_notification_content'])) {
-        return stripslashes($_POST['tbd_notification_content']);
-    }
-    return $content;
-}, 1);
-
-// Tắt escape cho option
-add_filter('pre_update_option_tbd_all_notifications', function($value, $old_value, $option) {
-    // Đảm bảo nội dung không bị escape
-    if (is_array($value)) {
-        foreach ($value as $key => $notification) {
-            if (isset($notification['content'])) {
-                $value[$key]['content'] = stripslashes($notification['content']);
+        return $settings;
+    }, 10, 2);
+    
+    // Filter cho wp_kses_allowed_html chỉ khi lưu thông báo
+    add_filter('wp_kses_allowed_html', function($tags, $context) {
+        // Chỉ áp dụng khi đang lưu thông báo
+        if (isset($_POST['tbd_notification_content'])) {
+            $tags['script'] = array(
+                'type' => true, 'src' => true, 'async' => true, 'defer' => true, 'charset' => true
+            );
+            $tags['style'] = array(
+                'type' => true, 'media' => true
+            );
+            $tags['iframe'] = array(
+                'src' => true, 'height' => true, 'width' => true, 'frameborder' => true, 'allowfullscreen' => true, 'allow' => true
+            );
+            // Cho phép mọi thuộc tính cho mọi thẻ
+            foreach ($tags as $tag => &$attrs) {
+                $attrs = true;
             }
         }
-    }
-    return $value;
-}, 1, 3);
-
-// Tắt escape cho TinyMCE
-add_filter('tiny_mce_before_init', function($init) {
-    $init['valid_elements'] = '*[*]';
-    $init['extended_valid_elements'] = '*[*]';
-    $init['entities'] = false;
-    $init['verify_html'] = false;
-    $init['cleanup'] = false;
-    $init['cleanup_on_startup'] = false;
-    $init['validate_children'] = false;
-    return $init;
-}, 999);
-
-// Tắt escape cho wp_editor
-add_filter('wp_editor_settings', function($settings, $editor_id) {
-    if ($editor_id === 'tbd_notification_content') {
-        $settings['wpautop'] = false;
-        $settings['media_buttons'] = false;
-        $settings['textarea_rows'] = 15;
-        $settings['teeny'] = false;
-        $settings['tinymce'] = array(
-            'valid_elements' => '*[*]',
-            'extended_valid_elements' => '*[*]',
-            'entities' => false,
-            'verify_html' => false,
-            'cleanup' => false,
-            'cleanup_on_startup' => false,
-            'validate_children' => false,
-        );
-    }
-    return $settings;
-}, 10, 2);
+        return $tags;
+    }, 999, 2);
+}
+add_action('admin_init', 'tbd_apply_editor_filters');
