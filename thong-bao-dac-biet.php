@@ -161,43 +161,28 @@ function tbd_notification_shortcode( $atts ) {
         return '';
     }
 
-    // Lấy tất cả thông báo đã lưu
-    $all_notifications = get_option( 'tbd_all_notifications', array() );
-    $notification_data = $all_notifications[ $notification_id ] ?? null;
-    if ( ! $notification_data ) {
-        return '';
-    }
-
-    // Nếu badge không active thì không hiển thị
-    if (empty($notification_data['active'])) {
-        return '';
-    }
-
-    $notification_title    = $notification_data['title'] ?? '';
-    $notification_content  = $notification_data['content'] ?? '';
-    $notification_duration = absint( $notification_data['duration'] ?? 5 );
-    $start_datetime_str    = $notification_data['start_datetime'] ?? '';
-    $end_datetime_str      = $notification_data['end_datetime'] ?? '';
-
-    $current_time = current_time( 'timestamp' );
-    $show_notification = false;
-    if ( ! empty( $notification_title ) || ! empty( $notification_content ) ) {
-        if ( ! empty( $start_datetime_str ) && ! empty( $end_datetime_str ) ) {
-            $start_timestamp = strtotime( $start_datetime_str );
-            $end_timestamp   = strtotime( $end_datetime_str );
-            if ( $current_time >= $start_timestamp && $current_time <= $end_timestamp ) {
-                $show_notification = true;
+    // Trả về khung rỗng + script AJAX để load nội dung động
+    ob_start();
+    ?>
+    <div class="tbd-shortcode-notification" data-notification-id="<?php echo esc_attr($notification_id); ?>"></div>
+    <script>(function($){
+        $(function(){
+            var $el = $('.tbd-shortcode-notification[data-notification-id="<?php echo esc_attr($notification_id); ?>"]');
+            if ($el.length) {
+                $.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    action: 'tbd_get_notification',
+                    notification_id: '<?php echo esc_js($notification_id); ?>',
+                    nonce: '<?php echo wp_create_nonce('tbd_get_notification_nonce'); ?>'
+                }, function(res){
+                    if (res.success && res.data && res.data.content) {
+                        $el.html(res.data.content);
+                    }
+                });
             }
-        } elseif ( empty( $start_datetime_str ) && empty( $end_datetime_str ) ) {
-            $show_notification = true;
-        }
-    }
-    if ( ! $show_notification ) {
-        return '';
-    }
-
-    // Xuất nội dung trực tiếp, không escape/lọc
-    return $notification_content;
+        });
+    })(jQuery);</script>
+    <?php
+    return ob_get_clean();
 }
 add_shortcode( 'thong_bao_dac_biet', 'tbd_notification_shortcode' );
 
