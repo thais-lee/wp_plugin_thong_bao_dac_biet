@@ -81,37 +81,32 @@ function tbd_get_notification_ajax_callback() {
         wp_send_json_error( 'Notification not found.' );
     }
 
-    $notification_title    = sanitize_text_field( $notification_data['title'] ?? '' );
-    // Bỏ wp_kses_post() để cho phép HTML và JS trong nội dung
-    $notification_content  = $notification_data['content'] ?? ''; // KHÔNG LỌC NỘI DUNG NỮA
-    $notification_duration = absint( $notification_data['duration'] ?? 5 );
+    // Chỉ trả về nếu thông báo đang active
+    if ( empty($notification_data['active']) ) {
+        wp_send_json_error( 'Notification is not active.' );
+    }
+
+    $notification_content  = $notification_data['content'] ?? '';
     $start_datetime_str    = sanitize_text_field( $notification_data['start_datetime'] ?? '' );
     $end_datetime_str      = sanitize_text_field( $notification_data['end_datetime'] ?? '' );
-
-    $current_time = current_time( 'timestamp' ); // Lấy thời gian hiện tại của WordPress
-
+    $current_time = current_time( 'timestamp' );
     $show_notification = false;
 
-    // Kiểm tra nếu có tiêu đề hoặc nội dung và nằm trong khoảng thời gian hiển thị
-    if ( ! empty( $notification_title ) || ! empty( $notification_content ) ) {
+    if ( ! empty( $notification_content ) ) {
         if ( ! empty( $start_datetime_str ) && ! empty( $end_datetime_str ) ) {
             $start_timestamp = strtotime( $start_datetime_str );
             $end_timestamp   = strtotime( $end_datetime_str );
-
             if ( $current_time >= $start_timestamp && $current_time <= $end_timestamp ) {
                 $show_notification = true;
             }
         } elseif ( empty( $start_datetime_str ) && empty( $end_datetime_str ) ) {
-            // Nếu không có thời gian cụ thể, luôn hiển thị
             $show_notification = true;
         }
     }
 
     if ( $show_notification ) {
         wp_send_json_success( array(
-            'title'    => $notification_title,
-            'content'  => $notification_content,
-            'duration' => $notification_duration
+            'content'  => $notification_content
         ) );
     } else {
         wp_send_json_error( 'Notification not configured or not within display period.' );
