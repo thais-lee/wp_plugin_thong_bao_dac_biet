@@ -279,6 +279,7 @@ function tbd_add_edit_notification_form( $notification_id = null ) {
                     <th scope="row"><label for="tbd_notification_content"><?php esc_html_e( 'Nội dung Thông báo', 'thong-bao-dac-biet' ); ?></label></th>
                     <td>
                         <?php
+                        // Truyền raw HTML vào wp_editor, không escape để tránh bị thêm ký tự \ và giữ nguyên style
                         wp_editor(
                             $notification_data['content'],
                             'tbd_notification_content',
@@ -288,6 +289,16 @@ function tbd_add_edit_notification_form( $notification_id = null ) {
                                 'media_buttons' => true,
                                 'textarea_rows' => 10,
                                 'quicktags'     => true,
+                                'wpautop'       => false, // Không tự động thêm <p>
+                                'tinymce'       => array(
+                                    'valid_elements' => '*[*]',
+                                    'extended_valid_elements' => '*[*]',
+                                    'entities' => false,
+                                    'verify_html' => false,
+                                    'cleanup' => false,
+                                    'cleanup_on_startup' => false,
+                                    'validate_children' => false,
+                                ),
                             )
                         );
                         ?>
